@@ -1,6 +1,6 @@
 import { 
   View, Text, ScrollView ,Image,Button, 
-  StyleSheet, ImageBackground, ActivityIndicator, Pressable} from 'react-native';
+  StyleSheet, ImageBackground, ActivityIndicator, Pressable, TouchableOpacity} from 'react-native';
 import React,{useEffect,useState} from 'react';
 import axios from 'axios';
 import Detailpage from './detailpage';
@@ -13,6 +13,8 @@ export default function Apicall(props) {
 
     const [apiData, setapiData] = useState([]);
     const [isLoading, setLoading] = useState(false);
+    const [cartData,setCartData] = useState({});
+    const [totalqty,settotalqty]= useState(0);
 
     const apiURL =
     'https://api.dotshowroom.in/api/dotk/catalog/getItemsBasicDetailsByStoreId/2490120?category_type=0';
@@ -20,15 +22,61 @@ export default function Apicall(props) {
 useEffect(()=>{
     axios.get(apiURL).then(data=>{
       console.log(data,"typing")
-     setapiData(data.data);
+    
      setLoading(true);
-       setTimeout(() => {
+     setapiData(data.data);
       setLoading(false);
-    }, 3);
+    
     });
-
 },[]);
 
+useEffect(()=>{
+    var totalQuantity =0;
+  cartData && Object.keys(cartData)?.length &&
+  Object.keys(cartData).map((key)=>{
+    totalQuantity = totalQuantity + cartData[key]?. quantity 
+  });
+console.log( totalQuantity);
+settotalqty(totalQuantity);
+},[cartData]);
+
+
+const handleCart =(productItem)=>{
+  let cartPayload = {...cartData};
+console.log("cart",cartPayload);
+cartPayload[productItem?.id]={
+  ...productItem,
+  quantity : 1,
+}
+  setCartData(cartPayload);
+}
+
+const incrementCart=(id)=>{
+  let cartPayload = {...cartData};
+  cartPayload[id].quantity= cartPayload[id].quantity + 1;
+  setCartData(cartPayload);
+}
+const decrementCart=(id)=>{
+  let cartPayload = {...cartData};
+  cartPayload[id].quantity= cartPayload[id].quantity - 1;
+  setCartData(cartPayload);
+}
+
+const renderCartButton=(productItem)=>{
+  return(
+    cartData[productItem?.id]?.quantity ?(<View style={{flexDirection:'row',justifyContent:'space-between'}}>
+    <TouchableOpacity style={{flex:1}} onPress={()=> decrementCart(productItem?.id)}>
+      <Text style={{textAlign:'center', backgroundColor:'blue', color:'white', fontSize:15,fontWeight:'bold'}}>-</Text>
+      </TouchableOpacity>
+   <Text style={{flex:1 ,textAlign:"center"}}>
+     {cartData[productItem?.id]?.quantity} </Text>
+   <TouchableOpacity style={{ flex:1}} onPress={()=>incrementCart(productItem?.id)}>
+     <Text style={{textAlign:'center', backgroundColor:'blue', color:'white', fontSize:15}} >+</Text>
+     </TouchableOpacity>
+  </View>):(<Button  onPress={()=>handleCart(productItem)} title="Add to cart" />)
+
+  );
+}
 
 
   return (
@@ -45,17 +93,18 @@ useEffect(()=>{
             <View style={{backgroundColor:"black"}}>
               <Text style={styles.catName}> { item?.category?.name} </Text>
               <View style={styles.productItemContainer}>
-                {item?.items?.map(productItem => {
+                {item?.items?.slice(0,2)?. map(productItem => {
                   return (
                     <View style={styles.productItem}>
-                     <Image  
+                      <TouchableOpacity onPress={()=> props.navigation.navigate("Detailpage", {data: productItem,})}>
+                      <Image  
                         style={{height: 150, width: '100%'}}
                         source={{uri: productItem?.image_url}}
                       />
                       <Text
                         style={{fontSize: 15, marginBottom: 10, color: '#000'}}
                         numberOfLines={1}>
-                        {productItem                      ?.name}
+                        {productItem?.name}
                       </Text>
                       <View style={styles.priceWrap}>
                         <Text style={styles.dprice}>
@@ -65,17 +114,29 @@ useEffect(()=>{
                           {productItem?.discounted_price} INR
                         </Text>
                       </View>
-                      <Button onPress={()=> props.navigation.navigate("Detailpage", {data: productItem,})}  title="Add to cart" />
+                      </TouchableOpacity>
+                      { renderCartButton(productItem)}
                     </View>
                   );
                          })}
-              </View>
-            </View>
+                </View>
+               {item?.items?.length>2 ? <Text style={{color:'white'}}>see all products......</Text>:null}
+                </View>
           );
                })}  
 
-    </ScrollView> )}
+    </ScrollView>
+    )}
+    <View>
+      { cartData && Object.keys(cartData)?.length ?
+      <Pressable
+      onPress={()=> props.navigation.navigate("CartPage", {data : cartData,})}
+       style={{flexDirection:'row',justifyContent:'space-between', padding:10,backgroundColor: 'lightblue'}}>
+      <Text>View cart</Text>
+      <Text> {totalqty} </Text>
+    </Pressable> : null}
     </View>
+   </View>
     
   );
              
@@ -83,7 +144,8 @@ useEffect(()=>{
 const styles = StyleSheet.create ({
    
     container: {
-        padding: 20,
+      
+        flex:1
       },
       pageHeading: {
         fontSize: 30,

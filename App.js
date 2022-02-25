@@ -26,11 +26,12 @@ import Contactfrom from './contactfrom';
 import Paytmui from './paytmui';
 import SearchProduct from './searchProduct';
 import Listdata from './listdata';
+import CartPage from './cart';
 const Stack = createNativeStackNavigator();
 const App=   () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName='SearchProduct' screenOptions={{headerShown: false,}}>
+      <Stack.Navigator initialRouteName='Apicall' screenOptions={{headerShown: false,}}>
       
         <Stack.Screen name="Apicall" component={Apicall} />
         <Stack.Screen name="Detailpage" component={Detailpage}/>
@@ -39,6 +40,7 @@ const App=   () => {
 
         <Stack.Screen name="SearchProduct" component={SearchProduct}/>
         <Stack.Screen name="Listdata" component={Listdata}/>
+        <Stack.Screen name="CartPage" component={CartPage}/>
         
       </Stack.Navigator>
     </NavigationContainer>

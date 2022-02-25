@@ -72,9 +72,9 @@ console.log(error)
       </TouchableOpacity>
     </View>
     <View >
-    <TouchableOpacity onPress={()=> props.navigation.navigate("Apicall")}>
+   {/*  <TouchableOpacity onPress={()=> props.navigation.navigate("Apicall")}>
       <Text style={{color:"black",fontWeight:'bold'}}>View all products..</Text>
-    </TouchableOpacity>
+    </TouchableOpacity>*/}
   
   </View>
     {isLoading?( <ActivityIndicator color={'blue'} size="large" animating={isLoading}  textContent='Loading..'/> ):null}
